@@ -1,0 +1,5 @@
+can input number 
+    implement update to board
+
+bugs
+stop input if guess attempts to place number that is invalid
