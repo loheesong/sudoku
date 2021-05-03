@@ -1,5 +1,4 @@
-can input number 
-    implement update to board
+rewrite the solver function
 
 bugs
-stop input if guess attempts to place number that is invalid
+why does solve function undo its progress
