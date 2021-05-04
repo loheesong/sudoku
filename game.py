@@ -1,5 +1,4 @@
-import pygame
-import time
+import pygame, time, datetime
 from solver import possible
 
 # constants are in all caps
@@ -204,26 +203,29 @@ class Cubes:
         img_rect = img.get_rect(center= (self.x_center, self.y_center))
         win.blit(img, img_rect)
 
+def update_timer(time_passed, win):
+    timer = smallFont.render(str(datetime.timedelta(seconds=time_passed)), True, (0,0,0))
+    timer_rect = timer.get_rect(center= (490, 570))
+    win.blit(timer, timer_rect)
+
 # main game logic here
 def main():
-    grid = Grid(board, WIDTH, HEIGHT)
-
-    #print(grid.board)  
-    
+    grid = Grid(board, WIDTH, HEIGHT)    
     clock = pygame.time.Clock()
     run = True
     key = None
+    start = time.time()
 
     while run:
         clock.tick(FPS)
-        mouse_pos = pygame.mouse.get_pos()
+        time_passed = round(time.time() - start)
 
         for event in pygame.event.get():
             if event.type == pygame.QUIT:
                 run = False
             
             if event.type == pygame.MOUSEBUTTONUP:
-                grid.on_click(mouse_pos)
+                grid.on_click(pygame.mouse.get_pos())
 
             if event.type == pygame.KEYDOWN:
                 if event.key == pygame.K_1:
@@ -259,6 +261,7 @@ def main():
             key = None
 
         grid.render(WIN)
+        update_timer(time_passed, WIN)
         pygame.display.update()
 
 main()
