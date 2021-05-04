@@ -1,4 +1,5 @@
-rewrite the solver function
+implement timer function 
 
-bugs
-why does solve function undo its progress
+can play again 
+
+load sudoku puzzles

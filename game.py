@@ -121,6 +121,9 @@ class Grid:
             self.board[self.selected_cube.row][self.selected_cube.col] = 0
 
     def solve(self, win):
+        if self.is_finished():
+            return True
+
         # go through every box 
         for row in range(9):
             for col in range(9):
@@ -139,7 +142,8 @@ class Grid:
                             pygame.time.delay(1)
 
                             # call solve again to fill next box 
-                            self.solve(WIN) 
+                            if self.solve(WIN):
+                                return True
 
                             self.board[row][col] = 0
                             self.cubes[row][col].n = 0
@@ -148,15 +152,8 @@ class Grid:
                             pygame.time.delay(1)
 
                     # if all numbers not valid
-                    return 
+                    return False
         print(self.board)
-        #return
-    
-    def abc(self):
-        for row in range(9):
-            for col in range(9):
-                self.cubes[row][col].n = self.board[row][col]
-
 
 class Cubes:
     def __init__(self, row, col):
@@ -176,7 +173,6 @@ class Cubes:
         self.y_center = self.y + HEIGHT / 9 / 2
         
         self.selected = False
-        
 
     def render(self, win):
         if self.selected: 
@@ -197,7 +193,6 @@ class Cubes:
         img = numFont.render(str(self.n), True, (0,0,0))
         img_rect = img.get_rect(center= (self.x_center, self.y_center))
         win.blit(img, img_rect)
-
 
 # main game logic here
 def main():
