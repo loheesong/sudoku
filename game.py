@@ -1,5 +1,5 @@
 import pygame
-from pygame.locals import *
+import time
 from solver import possible
 
 # constants are in all caps
@@ -121,6 +121,7 @@ class Grid:
             self.board[self.selected_cube.row][self.selected_cube.col] = 0
 
     def solve(self, win):
+        # once board is solved return true to resolve stack
         if self.is_finished():
             return True
 
@@ -151,9 +152,18 @@ class Grid:
                             pygame.display.update()
                             pygame.time.delay(1)
 
-                    # if all numbers not valid aaa
+                    # if all numbers not valid
                     return False
         print(self.board)
+
+    def reset4solve(self):
+        for row in self.cubes:
+            for col in row:
+                # if not puzzle square
+                if col.guess != -1:
+                    col.n = 0
+                    col.guess = 0
+                    self.board[col.row][col.col] = 0
 
 class Cubes:
     def __init__(self, row, col):
@@ -212,7 +222,7 @@ def main():
             if event.type == pygame.QUIT:
                 run = False
             
-            if event.type == MOUSEBUTTONUP:
+            if event.type == pygame.MOUSEBUTTONUP:
                 grid.on_click(mouse_pos)
 
             if event.type == pygame.KEYDOWN:
@@ -240,6 +250,7 @@ def main():
                 if event.key == pygame.K_RETURN:
                     grid.update()
                 if event.key == pygame.K_SPACE:
+                    grid.reset4solve()
                     grid.solve(WIN)
                     
             # guess number if key and cube is selected 
@@ -252,5 +263,3 @@ def main():
 
 main()
 pygame.quit()
-
-
