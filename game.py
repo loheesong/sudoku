@@ -151,7 +151,7 @@ class Grid:
                             pygame.display.update()
                             pygame.time.delay(1)
 
-                    # if all numbers not valid a
+                    # if all numbers not valid aaa
                     return False
         print(self.board)
 
