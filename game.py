@@ -139,7 +139,7 @@ class Grid:
                             self.cubes[row][col].n = n
                             self.cubes[row][col].draw_change(win)
                             pygame.display.update()
-                            pygame.time.delay(1)
+                            #pygame.time.delay(1)
 
                             # call solve again to fill next box 
                             if self.solve(WIN):
@@ -149,7 +149,7 @@ class Grid:
                             self.cubes[row][col].n = 0
                             self.cubes[row][col].draw_change(win)
                             pygame.display.update()
-                            pygame.time.delay(1)
+                            #pygame.time.delay(1)
 
                     # if all numbers not valid
                     return False
@@ -199,9 +199,10 @@ class Cubes:
 
     def draw_change(self, win):
         pygame.draw.rect(win, (255, 255, 255), pygame.Rect(self.x+10, self.y+10, self.width-20, self.height-20))
-        img = numFont.render(str(self.n), True, (0,0,0))
-        img_rect = img.get_rect(center= (self.x_center, self.y_center))
-        win.blit(img, img_rect)
+        if self.n != 0:
+            img = numFont.render(str(self.n), True, (0,0,0))
+            img_rect = img.get_rect(center= (self.x_center, self.y_center))
+            win.blit(img, img_rect)
 
 def update_timer(time_passed, win):
     timer = smallFont.render(str(datetime.timedelta(seconds=time_passed)), True, (0,0,0))
