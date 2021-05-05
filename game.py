@@ -8,6 +8,7 @@ pygame.display.set_caption("Sudoku")
 pygame.font.init()
 numFont = pygame.font.SysFont("tahoma", 32)
 smallFont = pygame.font.SysFont("tahoma", 24)
+bigFont = pygame.font.SysFont("tahoma", 56)
 
 FPS = 60
 board = [[5, 3, 0, 0, 7, 0, 0, 0, 0],
@@ -209,60 +210,117 @@ def update_timer(time_passed, win):
     timer_rect = timer.get_rect(center= (490, 570))
     win.blit(timer, timer_rect)
 
+def game_finished(win, solved, player_time, com_time=0):
+    win.fill((255,255,255))
+
+    # if player manually solves 
+    if solved:
+        vic = bigFont.render("Victory!", True, (0,0,0))
+        vic_rect = vic.get_rect(center= (WIDTH / 2, HEIGHT / 2))
+        win.blit(vic, vic_rect)
+    # if computer solves
+    else:
+        lose = bigFont.render("Game Over", True, (0,0,0))
+        lose_rect = lose.get_rect(center= (WIDTH / 2, HEIGHT / 2))
+        win.blit(lose, lose_rect)
+
+    # display time taken 
+    p_time = numFont.render("You took: " + str(datetime.timedelta(seconds=player_time)), True, (0,0,0))
+    p_time_rect = p_time.get_rect(center= (WIDTH / 2, HEIGHT / 4*3 - 15))
+    win.blit(p_time, p_time_rect)
+
+    if com_time != 0:
+        c_time = numFont.render("Computer took: " + str(datetime.timedelta(seconds=com_time)), True, (0,0,0))
+        c_time_rect = c_time.get_rect(center= (WIDTH / 2, HEIGHT / 4*3 + 15))
+        win.blit(c_time, c_time_rect)
+
+def resetAll():
+    pass
+
 # main game logic here
 def main():
     grid = Grid(board, WIDTH, HEIGHT)    
     clock = pygame.time.Clock()
     run = True
     key = None
-    start = time.time()
+    solved = True
+    start_time = time.time()
+    gameState = "run"
 
     while run:
         clock.tick(FPS)
-        time_passed = round(time.time() - start)
 
-        for event in pygame.event.get():
-            if event.type == pygame.QUIT:
-                run = False
+        if grid.is_finished():
+            gameState = "end"
+
+        if gameState == "run":
+            for event in pygame.event.get():
+                if event.type == pygame.QUIT:
+                    run = False
+                
+                if event.type == pygame.MOUSEBUTTONUP:
+                    grid.on_click(pygame.mouse.get_pos())
+
+                if event.type == pygame.KEYDOWN:
+                    if event.key == pygame.K_1:
+                        key = 1
+                    if event.key == pygame.K_2:
+                        key = 2
+                    if event.key == pygame.K_3:
+                        key = 3
+                    if event.key == pygame.K_4:
+                        key = 4
+                    if event.key == pygame.K_5:
+                        key = 5
+                    if event.key == pygame.K_6:
+                        key = 6
+                    if event.key == pygame.K_7:
+                        key = 7
+                    if event.key == pygame.K_8:
+                        key = 8
+                    if event.key == pygame.K_9:
+                        key = 9
+                    if event.key == pygame.K_BACKSPACE:
+                        grid.clear()
+                        key = None
+                    if event.key == pygame.K_RETURN:
+                        grid.update()
+                    if event.key == pygame.K_SPACE:
+                        player_time = round(time.time() - start_time)
+                        grid.reset4solve()
+                        grid.solve(WIN)
+                        solved = False
+                        com_time = round(time.time() - start_time - player_time)
+
+                # guess number if key and cube is selected 
+            if key != None and grid.selected_cube != None:
+                grid.guess(key)
+                key = None
+
+            grid.render(WIN)
             
-            if event.type == pygame.MOUSEBUTTONUP:
-                grid.on_click(pygame.mouse.get_pos())
+            time_passed = round(time.time() - start_time)
+            update_timer(time_passed, WIN)
+        
+        # ending screen
+        elif gameState == "end":
+            # if player solved
+            if solved:
+                game_finished(WIN, solved, time_passed)
+            # if com solved
+            else: 
+                game_finished(WIN, solved, player_time, com_time)
 
-            if event.type == pygame.KEYDOWN:
-                if event.key == pygame.K_1:
-                    key = 1
-                if event.key == pygame.K_2:
-                    key = 2
-                if event.key == pygame.K_3:
-                    key = 3
-                if event.key == pygame.K_4:
-                    key = 4
-                if event.key == pygame.K_5:
-                    key = 5
-                if event.key == pygame.K_6:
-                    key = 6
-                if event.key == pygame.K_7:
-                    key = 7
-                if event.key == pygame.K_8:
-                    key = 8
-                if event.key == pygame.K_9:
-                    key = 9
-                if event.key == pygame.K_BACKSPACE:
-                    grid.clear()
-                    key = None
-                if event.key == pygame.K_RETURN:
-                    grid.update()
-                if event.key == pygame.K_SPACE:
-                    grid.reset4solve()
-                    grid.solve(WIN)
-                    
-            # guess number if key and cube is selected 
-        if key != None and grid.selected_cube != None:
-            grid.guess(key)
-            key = None
+            for event in pygame.event.get():
+                if event.type == pygame.QUIT:
+                    run = False
 
-        grid.render(WIN)
-        update_timer(time_passed, WIN)
+                if event.type == pygame.KEYDOWN:
+                    if event.key == pygame.K_RETURN:
+                        resetAll()
+
+        
+        
         pygame.display.update()
 
 main()
