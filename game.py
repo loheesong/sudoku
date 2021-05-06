@@ -3,6 +3,7 @@ from solver import possible
 
 # constants are in all caps
 WIDTH, HEIGHT = 540, 540
+FPS = 60
 WIN = pygame.display.set_mode((540, 600))
 pygame.display.set_caption("Sudoku")
 pygame.font.init()
@@ -10,7 +11,6 @@ numFont = pygame.font.SysFont("tahoma", 32)
 smallFont = pygame.font.SysFont("tahoma", 24)
 bigFont = pygame.font.SysFont("tahoma", 56)
 
-FPS = 60
 board = [[5, 3, 0, 0, 7, 0, 0, 0, 0],
             [6, 0, 0, 1, 9, 5, 0, 0, 0],
             [0, 9, 8, 0, 0, 0, 0, 6, 0],
@@ -62,16 +62,6 @@ class Grid:
             for col in range(9):
                 self.cubes[row][col].n = self.board[row][col]
                 self.cubes[row][col].render(win)
-        
-        # displays number of mistakes
-        img = smallFont.render("X: " + str(self.mistakes), True, (0,0,0))
-        img_rect = img.get_rect(center= (25, 570))
-        win.blit(img, img_rect)
-
-        # display solve msg
-        solvemsg = smallFont.render("Press Space to solve", True, (0,0,0))
-        solvemsg_rect = solvemsg.get_rect(center= (self.width / 2, 570))
-        win.blit(solvemsg, solvemsg_rect)
 
     # checks if board is completed
     def is_finished(self):
@@ -164,6 +154,9 @@ class Grid:
                     col.n = 0
                     col.guess = 0
                     self.board[col.row][col.col] = 0
+    
+    def reset4new(self):
+        pass
 
 class Cubes:
     def __init__(self, row, col):
@@ -205,37 +198,63 @@ class Cubes:
             img_rect = img.get_rect(center= (self.x_center, self.y_center))
             win.blit(img, img_rect)
 
-def update_timer(time_passed, win):
-    timer = smallFont.render(str(datetime.timedelta(seconds=time_passed)), True, (0,0,0))
-    timer_rect = timer.get_rect(center= (490, 570))
-    win.blit(timer, timer_rect)
+def update_stats(win, grid, time_passed, gameState):
+    if gameState == "run":
+        # displays number of mistakes
+        img = smallFont.render("X: " + str(grid.mistakes), True, (0,0,0))
+        img_rect = img.get_rect(center= (25, 570))
+        win.blit(img, img_rect)
 
+        # display solve msg
+        solvemsg = smallFont.render("Press Space to solve", True, (0,0,0))
+        solvemsg_rect = solvemsg.get_rect(center= (grid.width / 2, 570))
+        win.blit(solvemsg, solvemsg_rect)
+
+        # timer 
+        timer = smallFont.render(str(datetime.timedelta(seconds=time_passed)), True, (0,0,0))
+        timer_rect = timer.get_rect(center= (490, 570))
+        win.blit(timer, timer_rect)
+    elif gameState == "ans":
+        # display next msg
+        solvemsg = smallFont.render("Press Space to end", True, (0,0,0))
+        solvemsg_rect = solvemsg.get_rect(center= (grid.width / 2, 570))
+        win.blit(solvemsg, solvemsg_rect)
+    
 def game_finished(win, solved, player_time, com_time=0):
     win.fill((255,255,255))
 
     # if player manually solves 
     if solved:
         vic = bigFont.render("Victory!", True, (0,0,0))
-        vic_rect = vic.get_rect(center= (WIDTH / 2, HEIGHT / 2))
+        vic_rect = vic.get_rect(center= (WIDTH / 2, HEIGHT / 4))
         win.blit(vic, vic_rect)
     # if computer solves
     else:
         lose = bigFont.render("Game Over", True, (0,0,0))
-        lose_rect = lose.get_rect(center= (WIDTH / 2, HEIGHT / 2))
+        lose_rect = lose.get_rect(center= (WIDTH / 2, HEIGHT / 4))
         win.blit(lose, lose_rect)
 
     # display time taken 
     p_time = numFont.render("You took: " + str(datetime.timedelta(seconds=player_time)), True, (0,0,0))
-    p_time_rect = p_time.get_rect(center= (WIDTH / 2, HEIGHT / 4*3 - 15))
+    p_time_rect = p_time.get_rect(center= (WIDTH / 2, HEIGHT / 2 - 15))
     win.blit(p_time, p_time_rect)
 
     if com_time != 0:
         c_time = numFont.render("Computer took: " + str(datetime.timedelta(seconds=com_time)), True, (0,0,0))
-        c_time_rect = c_time.get_rect(center= (WIDTH / 2, HEIGHT / 4*3 + 15))
+        c_time_rect = c_time.get_rect(center= (WIDTH / 2, HEIGHT / 2 + 15))
         win.blit(c_time, c_time_rect)
 
-def resetAll():
-    pass
+    # display play again msg
+    play_again = numFont.render("Press ENTER to play again", True, (0,0,0))
+    play_again_rect = play_again.get_rect(center= (WIDTH / 2, HEIGHT / 4*3))
+    win.blit(play_again, play_again_rect)
+
+def resetAll(grid):
+    # reset mistakes and time
+    grid.mistakes = 0
+    start_time = time.time()
+
+    #grid.reset4new()
 
 # main game logic here
 def main():
@@ -245,13 +264,12 @@ def main():
     key = None
     solved = True
     start_time = time.time()
+    
+    # gameStates: run, ans, end
     gameState = "run"
 
     while run:
         clock.tick(FPS)
-
-        if grid.is_finished():
-            gameState = "end"
 
         if gameState == "run":
             for event in pygame.event.get():
@@ -289,10 +307,11 @@ def main():
                         player_time = round(time.time() - start_time)
                         grid.reset4solve()
                         grid.solve(WIN)
-                        solved = False
                         com_time = round(time.time() - start_time - player_time)
+                        solved = False
+                        gameState = "ans"
 
-                # guess number if key and cube is selected 
+            # guess number if key and cube is selected 
             if key != None and grid.selected_cube != None:
                 grid.guess(key)
                 key = None
@@ -300,8 +319,18 @@ def main():
             grid.render(WIN)
             
             time_passed = round(time.time() - start_time)
-            update_timer(time_passed, WIN)
+            update_stats(WIN, grid, time_passed, gameState)
         
+        # display the solved sudoku
+        elif gameState == "ans":
+            for event in pygame.event.get():
+                if event.type == pygame.KEYDOWN:
+                    if event.key == pygame.K_SPACE and gameState == "ans": 
+                            gameState = "end"
+                
+            grid.render(WIN)
+            update_stats(WIN, grid, time_passed, gameState)
+
         # ending screen
         elif gameState == "end":
             # if player solved
@@ -317,7 +346,10 @@ def main():
 
                 if event.type == pygame.KEYDOWN:
                     if event.key == pygame.K_RETURN:
-                        resetAll()
+                        resetAll(grid)
+                        start_time = time.time()
+                        gameState = "run"
+
 
         
         
