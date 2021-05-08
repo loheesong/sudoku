@@ -1,5 +1,4 @@
-can input number 
-    implement update to board
+can play again 
 
-bugs
-stop input if guess attempts to place number that is invalid
+load sudoku puzzles
+
