@@ -11,6 +11,8 @@ numFont = pygame.font.SysFont("tahoma", 32)
 smallFont = pygame.font.SysFont("tahoma", 24)
 bigFont = pygame.font.SysFont("tahoma", 56)
 
+
+
 board = [[5, 3, 0, 0, 7, 0, 0, 0, 0],
             [6, 0, 0, 1, 9, 5, 0, 0, 0],
             [0, 9, 8, 0, 0, 0, 0, 6, 0],
@@ -254,7 +256,7 @@ def resetAll(grid):
     grid.mistakes = 0
     start_time = time.time()
 
-    #grid.reset4new()
+    #grid.board = newboard
 
 # main game logic here
 def main():
