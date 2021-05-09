@@ -16,7 +16,7 @@ numFont = pygame.font.SysFont("tahoma", 32)
 smallFont = pygame.font.SysFont("tahoma", 24)
 bigFont = pygame.font.SysFont("tahoma", 56)
 
-def load_board() -> str: 
+def load_board(): 
     """Load csv sudokus, returns a random unsolved sudoku"""
 
     with open("puzzles.csv") as f:

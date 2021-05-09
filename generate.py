@@ -1,9 +1,14 @@
-#at least 17 clues in order to have a puzzle with one unique solution.
-s = "530070000600195000098000060800060003400803001700020006060000280000419005000080079"
-puzzle = [s[i:i+9] for i in range(0, len(s), 9)]
-board = [[int(i[j])  for j in range(9)] for i in puzzle]
+import random, copy
 
-def possible(grid, row, col, n):
+class SudokuGenerator:
+    """Class that generates a puzzle with solution"""
+
+    def __init__(self):
+        self.grid = [[0 for i in range(9)] for j in range(9)]
+
+
+    def possible(self, grid, row, col, n):
+        """Check if possible to place a number at a particular square, returns True if so"""
 
         # check row y for repeats
         for i in range(9):
@@ -24,46 +29,69 @@ def possible(grid, row, col, n):
                     return False
 
         return True
-# checks if board is completed
-def is_finished(grid):
-    for row in range(9):
-        for col in range(9):
-            if grid[row][col] == 0:
-                return False
+    # checks if board is completed
+    def is_finished(self, grid):
+        """Checks if board is completed, returns True if so"""
 
-    # if none of the numbers are 0, the board is finished 
-    return True
+        for row in range(9):
+            for col in range(9):
+                if grid[row][col] == 0:
+                    return False
 
-def solve(grid):
-    # once board is solved return true to resolve stack
-    if is_finished(grid):
+        # if none of the numbers are 0, the board is finished 
         return True
 
-    # go through every box 
-    for row in range(9):
-        for col in range(9):
+    def solve(self, grid):
+        """Solves sudoku"""
 
-            # if box is blank
-            if grid[row][col] == 0:
-                # generate numbers to place in box
-                for n in range(1,10):
+        # once board is solved return true to resolve stack
+        if self.is_finished(grid):
+            return True
 
-                    # chcek if number is valid
-                    if possible(grid, row, col, n):
-                        grid[row][col] = n
+        # go through every box 
+        for row in range(9):
+            for col in range(9):
 
-                        # call solve again to fill next box 
-                        if solve(grid):
-                            return True
+                # if box is blank
+                if grid[row][col] == 0:
+                    # generate numbers to place in box
+                    for n in range(1,10):
 
-                        grid[row][col] = 0
+                        # chcek if number is valid
+                        if self.possible(grid, row, col, n):
+                            grid[row][col] = n
 
-                # if all numbers not valid
-                return False
+                            # call solve again to fill next box 
+                            if self.solve(grid):
+                                return True
+
+                            grid[row][col] = 0
+
+                    # if all numbers not valid
+                    return False
+    def solution_gen(self):
+        """Generate fully filled sudoku"""
+
+        pass
+
+    def remove_num(self):
+        pass
 
 def main():
-    print(board)
-    solve(board)
-    print(board)
+    
+    gen = SudokuGenerator()
+    print(gen.grid)
+
+
 
 main()
+
+#at least 17 clues in order to have a puzzle with one unique solution.
+#s = "000700000100000000000430200000000006000509000000000418000081000002000050040000300"
+
+'''
+s = "530070000600195000098000060800060003400803001700020006060000280000419005000080079"
+
+puzzle = [s[i:i+9] for i in range(0, len(s), 9)]
+board = [[int(i[j])  for j in range(9)] for i in puzzle]
+'''
