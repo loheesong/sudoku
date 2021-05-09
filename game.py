@@ -1,5 +1,4 @@
-import pygame, time, datetime
-from solver import possible
+import pygame, time, datetime, csv, random
 
 # constants are in all caps
 WIDTH, HEIGHT = 540, 540
@@ -11,17 +10,25 @@ numFont = pygame.font.SysFont("tahoma", 32)
 smallFont = pygame.font.SysFont("tahoma", 24)
 bigFont = pygame.font.SysFont("tahoma", 56)
 
+def load_board():
+    with open("puzzles.csv") as f:
+        csv_reader = csv.reader(f, delimiter=',')
 
+        line_count = len(list(csv_reader))
+        f.seek(0)
 
-board = [[5, 3, 0, 0, 7, 0, 0, 0, 0],
-            [6, 0, 0, 1, 9, 5, 0, 0, 0],
-            [0, 9, 8, 0, 0, 0, 0, 6, 0],
-            [8, 0, 0, 0, 6, 0, 0, 0, 3],
-            [4, 0, 0, 8, 0, 3, 0, 0, 1],
-            [7, 0, 0, 0, 2, 0, 0, 0, 6],
-            [0, 6, 0, 0, 0, 0, 2, 8, 0],
-            [0, 0, 0, 4, 1, 9, 0, 0, 5],
-            [0, 0, 0, 0, 8, 0, 0, 7, 9]]
+        # pick a random puzzle
+        n = random.randint(0,line_count - 1)
+
+        for i, row in enumerate(csv_reader):
+            if n == i:
+                s = row[0]
+                break
+
+        puzzle = [s[i:i+9] for i in range(0, len(s), 9)]    
+        return [[int(i[j])  for j in range(9)] for i in puzzle]
+
+board = load_board()
 
 class Grid:
     def __init__(self, board, width, height):
@@ -39,7 +46,6 @@ class Grid:
                 if self.cubes[row][col].n != 0:
                     # set puzzle numbers guess to -1 to prevent overriding
                     self.cubes[row][col].guess = -1
-                #print(self.cubes[row][col].n)
 
         self.selected_cube = None
 
@@ -75,6 +81,28 @@ class Grid:
         # if none of the numbers are 0, the board is finished 
         return True
 
+    def possible(self, grid, row, col, n):
+
+        # check row y for repeats
+        for i in range(9):
+            if grid[row][i] == n:
+                return False
+        
+        # check column x for repeats
+        for i in range(9):
+            if grid[i][col] == n:
+                return False
+
+        # check box for repeats
+        y = row // 3
+        x = col // 3
+        for i in range(3):
+            for j in range(3):
+                if grid[y * 3 + i][x * 3 + j] == n:
+                    return False
+
+        return True
+
     def on_click(self, mouse_pos):
         if mouse_pos[1] < HEIGHT:
             # calculate which box is clicked
@@ -97,7 +125,7 @@ class Grid:
     def update(self):
         # cannot update puzzle squares
         if self.selected_cube.guess not in [0,-1]: 
-            if possible(self.board, self.selected_cube.row, self.selected_cube.col, self.selected_cube.guess):
+            if self.possible(self.board, self.selected_cube.row, self.selected_cube.col, self.selected_cube.guess):
                 self.selected_cube.n = self.selected_cube.guess
                 self.selected_cube.guess = 0
                 self.board[self.selected_cube.row][self.selected_cube.col] = self.selected_cube.n
@@ -127,7 +155,7 @@ class Grid:
                     for n in range(1,10):
 
                         # chcek if number is valid
-                        if possible(self.board, row, col, n):
+                        if self.possible(self.board, row, col, n):
                             self.board[row][col] = n
                             self.cubes[row][col].n = n
                             self.cubes[row][col].draw_change(win)
@@ -158,7 +186,13 @@ class Grid:
                     self.board[col.row][col.col] = 0
     
     def reset4new(self):
-        pass
+        for row in range(9):
+            for col in range(9):
+                self.cubes[row][col].n = self.board[row][col]
+
+                if self.cubes[row][col].n != 0:
+                    # set puzzle numbers guess to -1 to prevent overriding
+                    self.cubes[row][col].guess = -1
 
 class Cubes:
     def __init__(self, row, col):
@@ -251,13 +285,6 @@ def game_finished(win, solved, player_time, com_time=0):
     play_again_rect = play_again.get_rect(center= (WIDTH / 2, HEIGHT / 4*3))
     win.blit(play_again, play_again_rect)
 
-def resetAll(grid):
-    # reset mistakes and time
-    grid.mistakes = 0
-    start_time = time.time()
-
-    #grid.board = newboard
-
 # main game logic here
 def main():
     grid = Grid(board, WIDTH, HEIGHT)    
@@ -326,6 +353,9 @@ def main():
         # display the solved sudoku
         elif gameState == "ans":
             for event in pygame.event.get():
+                if event.type == pygame.QUIT:
+                    run = False
+
                 if event.type == pygame.KEYDOWN:
                     if event.key == pygame.K_SPACE and gameState == "ans": 
                             gameState = "end"
@@ -348,13 +378,12 @@ def main():
 
                 if event.type == pygame.KEYDOWN:
                     if event.key == pygame.K_RETURN:
-                        resetAll(grid)
+                        grid.mistakes = 0
                         start_time = time.time()
+                        grid.board = load_board()
+                        grid.reset4new()
                         gameState = "run"
 
-
-        
-        
         pygame.display.update()
 
 main()
