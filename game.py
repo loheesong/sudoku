@@ -1,5 +1,11 @@
 import pygame, time, datetime, csv, random
 
+"""
+Sudoku game with backtracking solving and new puzzles.
+
+No input, run code to play
+"""
+
 # constants are in all caps
 WIDTH, HEIGHT = 540, 540
 FPS = 60
@@ -10,7 +16,9 @@ numFont = pygame.font.SysFont("tahoma", 32)
 smallFont = pygame.font.SysFont("tahoma", 24)
 bigFont = pygame.font.SysFont("tahoma", 56)
 
-def load_board():
+def load_board() -> str: 
+    """Load csv sudokus, returns a random unsolved sudoku"""
+
     with open("puzzles.csv") as f:
         csv_reader = csv.reader(f, delimiter=',')
 
@@ -31,6 +39,8 @@ def load_board():
 board = load_board()
 
 class Grid:
+    """Class that handles rendering and logic of grid"""
+
     def __init__(self, board, width, height):
         self.board = board
         self.row = len(self.board)
@@ -53,6 +63,8 @@ class Grid:
 
     # draws current state to screen
     def render(self, win):
+        """Renders board with lines and numbers"""
+        
         win.fill((255,255,255))
 
         gap = self.width / 9
@@ -71,8 +83,9 @@ class Grid:
                 self.cubes[row][col].n = self.board[row][col]
                 self.cubes[row][col].render(win)
 
-    # checks if board is completed
     def is_finished(self):
+        """Checks if board is completed, returns True if so"""
+
         for row in range(9):
             for col in range(9):
                 if self.board[row][col] == 0:
@@ -82,6 +95,7 @@ class Grid:
         return True
 
     def possible(self, grid, row, col, n):
+        """Check if possible to place a number at a particular square, returns True if so"""
 
         # check row y for repeats
         for i in range(9):
@@ -104,6 +118,7 @@ class Grid:
         return True
 
     def on_click(self, mouse_pos):
+        """Selects cube when cube is clicked""" 
         if mouse_pos[1] < HEIGHT:
             # calculate which box is clicked
             row = int(mouse_pos[1] // (HEIGHT / 9))
@@ -117,12 +132,15 @@ class Grid:
             self.selected_cube = self.cubes[row][col]
         
     def guess(self, key):
+        """Allows player to guess number"""
+
         # prvents overriding puzzle numbers
         if self.selected_cube.n == 0:
             self.selected_cube.guess = key
 
-    # update when number is confirmed 
     def update(self):
+        """Update when number is confirmed"""
+
         # cannot update puzzle squares
         if self.selected_cube.guess not in [0,-1]: 
             if self.possible(self.board, self.selected_cube.row, self.selected_cube.col, self.selected_cube.guess):
@@ -134,6 +152,8 @@ class Grid:
                 self.selected_cube.guess = 0
 
     def clear(self):
+        """Clear user inputted squares"""
+
         # cannot clear puzzle squares
         if self.selected_cube.guess != -1:
             self.selected_cube.n = 0
@@ -141,6 +161,8 @@ class Grid:
             self.board[self.selected_cube.row][self.selected_cube.col] = 0
 
     def solve(self, win):
+        """Solves sudoku, returns solved board"""
+
         # once board is solved return true to resolve stack
         if self.is_finished():
             return True
@@ -177,6 +199,8 @@ class Grid:
         print(self.board)
 
     def reset4solve(self):
+        """Reset board to before any user input state for solve function"""
+
         for row in self.cubes:
             for col in row:
                 # if not puzzle square
@@ -186,6 +210,8 @@ class Grid:
                     self.board[col.row][col.col] = 0
     
     def reset4new(self):
+        """Resets cube objects to prepare for new puzzle once new game starts"""
+
         for row in range(9):
             for col in range(9):
                 self.cubes[row][col].n = self.board[row][col]
@@ -195,6 +221,8 @@ class Grid:
                     self.cubes[row][col].guess = -1
 
 class Cubes:
+    """Handles cube rendering and visualization for solve"""
+
     def __init__(self, row, col):
         self.row = row
         self.col = col
@@ -235,6 +263,8 @@ class Cubes:
             win.blit(img, img_rect)
 
 def update_stats(win, grid, time_passed, gameState):
+    """Update mistakes counter and timer, displays next instruction"""
+
     if gameState == "run":
         # displays number of mistakes
         img = smallFont.render("X: " + str(grid.mistakes), True, (0,0,0))
@@ -257,6 +287,8 @@ def update_stats(win, grid, time_passed, gameState):
         win.blit(solvemsg, solvemsg_rect)
     
 def game_finished(win, solved, player_time, com_time=0):
+    """Displays ending screen with time and instructions"""
+
     win.fill((255,255,255))
 
     # if player manually solves 
