@@ -1,10 +1,9 @@
 #at least 17 clues in order to have a puzzle with one unique solution.
-
+s = "530070000600195000098000060800060003400803001700020006060000280000419005000080079"
 puzzle = [s[i:i+9] for i in range(0, len(s), 9)]
 board = [[int(i[j])  for j in range(9)] for i in puzzle]
 
-
-def possible(self, grid, row, col, n):
+def possible(grid, row, col, n):
 
         # check row y for repeats
         for i in range(9):
@@ -26,10 +25,10 @@ def possible(self, grid, row, col, n):
 
         return True
 # checks if board is completed
-def is_finished(self):
+def is_finished(grid):
     for row in range(9):
         for col in range(9):
-            if self.board[row][col] == 0:
+            if grid[row][col] == 0:
                 return False
 
     # if none of the numbers are 0, the board is finished 
@@ -37,7 +36,7 @@ def is_finished(self):
 
 def solve(grid):
     # once board is solved return true to resolve stack
-    if is_finished():
+    if is_finished(grid):
         return True
 
     # go through every box 
@@ -54,11 +53,17 @@ def solve(grid):
                         grid[row][col] = n
 
                         # call solve again to fill next box 
-                        if solve(WIN):
+                        if solve(grid):
                             return True
 
                         grid[row][col] = 0
 
                 # if all numbers not valid
                 return False
-    print(grid)
+
+def main():
+    print(board)
+    solve(board)
+    print(board)
+
+main()
