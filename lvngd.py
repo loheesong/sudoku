@@ -182,5 +182,11 @@ class SudokuGenerator:
 				rounds -=1
 		return
 
-new_puzzle = SudokuGenerator()
-print(new_puzzle.original)
+s = "534070000600195000098000060800060003400803001700020006060000280000419005000080200"
+
+puzzle = [s[i:i+9] for i in range(0, len(s), 9)]
+board = [[int(i[j])  for j in range(9)] for i in puzzle]
+
+new_puzzle = SudokuGenerator(board)
+
+print(new_puzzle.grid)

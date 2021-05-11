@@ -1,4 +1,4 @@
-import random, copy
+import random, copy, numpy
 
 class SudokuGenerator:
     """Class that generates a puzzle with solution"""
@@ -9,7 +9,6 @@ class SudokuGenerator:
 
     def possible(self, grid, row, col, n):
         """Check if possible to place a number at a particular square, returns True if so"""
-
         # check row y for repeats
         for i in range(9):
             if grid[row][i] == n:
@@ -32,7 +31,6 @@ class SudokuGenerator:
     # checks if board is completed
     def is_finished(self, grid):
         """Checks if board is completed, returns True if so"""
-
         for row in range(9):
             for col in range(9):
                 if grid[row][col] == 0:
@@ -43,11 +41,6 @@ class SudokuGenerator:
 
     def solve(self, grid):
         """Solves sudoku"""
-
-        # once board is solved return true to resolve stack
-        if self.is_finished(grid):
-            return True
-
         # go through every box 
         for row in range(9):
             for col in range(9):
@@ -56,31 +49,62 @@ class SudokuGenerator:
                 if grid[row][col] == 0:
                     # generate numbers to place in box
                     for n in range(1,10):
-
                         # chcek if number is valid
                         if self.possible(grid, row, col, n):
                             grid[row][col] = n
 
-                            # call solve again to fill next box 
-                            if self.solve(grid):
+                            if self.is_finished(grid):
+                                self.counter += 1
+                                break
+                            else:
+                                # call solve again to fill next box 
+                                if self.solve(grid):
+                                    return True
+                    break
+        grid[row][col] = 0
+        # if all numbers not valid
+        return False
+
+    def solution_gen(self):
+        """Generate fully filled sudoku using backtracking"""
+        if self.is_finished(self.grid):
+            return True
+
+        num_list = [i for i in range(1,10)]
+        for row in range(9):
+            for col in range(9):
+                # find empty square 
+                if self.grid[row][col] == 0:
+                    random.shuffle(num_list)
+                    for n in num_list:
+                        if self.possible(self.grid, row, col, n):
+                            self.grid[row][col] = n
+
+                            if self.solution_gen():
                                 return True
 
-                            grid[row][col] = 0
-
-                    # if all numbers not valid
+                            self.grid[row][col] = 0
                     return False
-    def solution_gen(self):
-        """Generate fully filled sudoku"""
-
-        pass
 
     def remove_num(self):
+        """Remove numbers from grid to create puzzle"""
         pass
 
 def main():
     
     gen = SudokuGenerator()
-    print(gen.grid)
+    #gen.solution_gen()
+    #print(numpy.matrix(gen.grid))
+    s = "530070000600195000098000060800060003400803001700020006060000280000419005000080079"
+
+    puzzle = [s[i:i+9] for i in range(0, len(s), 9)]
+    board = [[int(i[j])  for j in range(9)] for i in puzzle]
+    print(board)
+    print(gen.solve(board))
+    print(board)
+
+
+
 
 
 
