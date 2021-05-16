@@ -1,10 +1,12 @@
 import random, copy, numpy
+from typing import Counter
 
 class SudokuGenerator:
     """Class that generates a puzzle with solution"""
 
     def __init__(self):
         self.grid = [[0 for i in range(9)] for j in range(9)]
+        self.counter = 0
 
 
     def possible(self, grid, row, col, n):
@@ -28,7 +30,7 @@ class SudokuGenerator:
                     return False
 
         return True
-    # checks if board is completed
+
     def is_finished(self, grid):
         """Checks if board is completed, returns True if so"""
         for row in range(9):
@@ -39,28 +41,24 @@ class SudokuGenerator:
         # if none of the numbers are 0, the board is finished 
         return True
 
-    def solve(self, grid):
+    def find_all_sol(self, grid):
         """Solves sudoku"""
         # go through every box 
-        for row in range(9):
-            for col in range(9):
-
-                # if box is blank
-                if grid[row][col] == 0:
-                    # generate numbers to place in box
-                    for n in range(1,10):
-                        # chcek if number is valid
-                        if self.possible(grid, row, col, n):
-                            grid[row][col] = n
-
-                            if self.is_finished(grid):
-                                self.counter += 1
-                                break
-                            else:
-                                # call solve again to fill next box 
-                                if self.solve(grid):
-                                    return True
-                    break
+        for i in range(9):
+            row=i//9
+            col=i%9
+            if grid[row][col] == 0:
+                for n in range(1,10):
+                    if self.possible(grid, row, col, n):
+                        grid[row][col] = n
+                        if self.is_finished(grid):
+                            self.counter += 1
+                            break
+                        else:
+                            # call solve again to fill next box 
+                            if self.find_all_sol(grid):
+                                return True
+                break
         grid[row][col] = 0
         # if all numbers not valid
         return False
@@ -99,9 +97,13 @@ def main():
 
     puzzle = [s[i:i+9] for i in range(0, len(s), 9)]
     board = [[int(i[j])  for j in range(9)] for i in puzzle]
+
     print(board)
-    print(gen.solve(board))
+    print(gen.find_all_sol(board))
     print(board)
+    print(gen.counter)
+    #gen.solution_gen()
+    #print(gen.grid)
 
 
 
