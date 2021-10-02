@@ -10,3 +10,4 @@ Click on a square then press a number to guess. To confirm the guess, press ente
 Python 3.9.1 and pygame 2.0.1 
 
 ## Visuals
+![](http://www.reactiongifs.us/wp-content/uploads/2013/10/nuh_uh_conan_obrien.gif)
