@@ -13,3 +13,7 @@ Click on a square then press a number to guess. To confirm the guess, press ente
 ## Technologies
 
 Python 3.9.1 and pygame 2.0.1 
+
+## How to use 
+
+Download game.py, new.csv and make sure pygame is installed. game.py and new.csv has to be in the same folder. Open your IDE and run the program from there. 
